@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faTrash, faMagnifyingGlass } from '@fortawesome/free-solid-svg-icons';  // Importer l'icône de recherche
 
 const ProductList = () => {
     const [products, setProducts] = useState([]);
@@ -12,6 +14,7 @@ const ProductList = () => {
         price: '',
         stock: '',
     });
+    const [searchQuery, setSearchQuery] = useState(''); // État pour la recherche
 
     useEffect(() => {
         getProducts();
@@ -76,6 +79,14 @@ const ProductList = () => {
         }
     };
 
+    // Filtrer les produits en fonction de la recherche
+    const filteredProducts = products.filter((product) => {
+        return (
+            product.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            product.description.toLowerCase().includes(searchQuery.toLowerCase())
+        );
+    });
+
     if (loading) {
         return <div>Chargement en cours...</div>;
     }
@@ -87,8 +98,24 @@ const ProductList = () => {
     return (
         <div className="mt-8">
             <h2 className="text-2xl font-bold mb-4">Liste des produits</h2>
+
+            {/* Champ de recherche avec icône */}
+            <div className="mb-4 relative">
+                <FontAwesomeIcon
+                    icon={faMagnifyingGlass} // Icône de recherche
+                    className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-600"
+                />
+                <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)} // Met à jour la valeur de recherche
+                    placeholder="Rechercher un produit..."
+                    className="p-2 pl-10 w-full border rounded"
+                />
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {products.map((product) => (
+                {filteredProducts.map((product) => (
                     <div key={product._id} className="bg-white p-4 rounded-lg shadow-md">
                         <img
                             src={`http://localhost:5000/${product.image}`}
@@ -111,6 +138,7 @@ const ProductList = () => {
                                 onClick={() => deleteProduct(product._id)} // Supprimer le produit
                                 className="bg-red-500 text-white p-2 rounded hover:bg-red-600"
                             >
+                                <FontAwesomeIcon icon={faTrash} />
                                 Supprimer
                             </button>
                         </div>
